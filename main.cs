@@ -2,45 +2,49 @@ using System;
 using System.Diagnostics;
 using System.IO;
 
-class Program
+namespace DFS_Optimizer
 {
-    static void Main(string[] args)
+    class Program
     {
-        string rpath = @"/usr/bin/R";
-        string scriptpath = @"'~/Documents/sources/DFS-Optimizer/";
-        string output = RunRScript(rpath, scriptpath);
-
-        Console.WriteLine(output);
-        Console.ReadLine();
-
-    }
-
-    private static string RunRScript(string rpath, string scriptpath)
-    {
-        try
+        static void Main(string[] args)
         {
-            var info = new ProcessStartInfo
-            {
-                FileName = rpath,
-                WorkingDirectory = Path.GetDirectoryName(scriptpath),
-                Arugments = scriptpath,
-                RedirectStandardOutput = true,
-                CreateNoWindow = true,
-                UseShellExecute = false
-            };
+            string rpath = @"/usr/bin/R";
+            string scriptpath = @"'~/Documents/sources/DFS-Optimizer/NBAOptimizer.R";
+            string output = RunRScript(rpath, scriptpath);
 
-            using(var proc = new Process {StartInfo = info})
-            {
-                proc.Start();
-                return proc.StandardOutput.ReadToEnd();
+            Console.WriteLine(output);
+            Console.ReadLine();
 
+        }
+
+        private static string RunRScript(string rpath, string scriptpath)
+        {
+            try
+            {
+                var info = new ProcessStartInfo
+                {
+                    FileName = rpath,
+                    WorkingDirectory = Path.GetDirectoryName(scriptpath),
+                    Arguments = scriptpath,
+                    RedirectStandardOutput = true,
+                    CreateNoWindow = true,
+                    UseShellExecute = false
+                };
+
+                using(var proc = new Process {StartInfo = info})
+                {
+                    proc.Start();
+                    return proc.StandardOutput.ReadToEnd();
+
+                }
+                
             }
-            
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.StackTrace);
+                Console.WriteLine(ex.Message);
+            }
+            return string.Empty;
         }
-        catch(Exception ex)
-        {
-            Console.WriteLine("Oops");
-        }
-        return string.Empty;
     }
 }
