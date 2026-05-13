@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 """
 Created on Mon Oct 21 19:58:48 2019
-
-@author: <username>
 """
 
 #%% packages
+import os
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup as bs
@@ -13,6 +12,9 @@ import numpy as np
 import re
 from datetime import date
 import unidecode
+
+# Set this to your local data directory
+BASE_DIR = r'C:\path\to\your\NBA\2019-2020'
 
 #%% init vars
 gamelogs_refresh = False  ### if you want to refresh 2020 gamelogs, change to True
@@ -31,7 +33,7 @@ min_games_SD = 10
 
 #%% Import BBM data
 
-BBM_filename = r'C:\Users\<username>\Desktop\NBA\2019-2020\BBM\DFS_' + date.today().strftime('%Y_%m_%d') + '.xls'
+BBM_filename = os.path.join(BASE_DIR, 'BBM', 'DFS_' + date.today().strftime('%Y_%m_%d') + '.xls')
 df_BBM = pd.read_excel(BBM_filename)
 df_agg = df_BBM[['Name', 'Price', 'Team', 'Pos', 'Opp', 'm/g', 'Value']]
 df_agg.rename(columns={'m/g':'BBM Mins', 'Value':'BBM Proj', 'Team':'Abbr'}, inplace=True)
@@ -68,7 +70,7 @@ df_matchups = df_matchups.drop_duplicates()
 
 #%% Import DFN Projection data
 
-DFN_filename = r'C:\Users\<username>\Desktop\NBA\2019-2020\DFN\DFN NBA FD ' + date.today().strftime('%#m_%#d') + '.csv'
+DFN_filename = os.path.join(BASE_DIR, 'DFN', 'DFN NBA FD ' + date.today().strftime('%#m_%#d') + '.csv')
 df_DFN = pd.read_csv(DFN_filename).rename(columns={'Player Name':'Name', 'Proj Min':'DFN Min', 'Proj FP':'DFN Proj'})
 
 df_DFN.Name.replace({'Wendell Carter Jr.':'Wendell Carter',
@@ -103,11 +105,11 @@ df_DFN.Name.replace({'Wendell Carter Jr.':'Wendell Carter',
 #%% Scrape 2019-2020 gamelogs
 
 if gamelogs_refresh == False:
-    df_gamelogs = pd.read_excel(r'C:\Users\<username>\Desktop\NBA\2019-2020\gamelogs_2020.xlsx')
+    df_gamelogs = pd.read_excel(os.path.join(BASE_DIR, 'gamelogs_2020.xlsx'))
     
 else:
 
-    df_players = pd.read_excel(r'C:\Users\<username>\Desktop\NBA\2019-2020\Player List 2020.xlsx', usecols='G:H')
+    df_players = pd.read_excel(os.path.join(BASE_DIR, 'Player List 2020.xlsx'), usecols='G:H')
     missing_record = []
     
     df_gamelogs = pd.DataFrame(columns = ['Rk','G','Date','Age','Tm','Unnamed: 5','Opp','Unnamed: 7','GS','MP','FG','FGA','FG%','3P','3PA','3P%',
@@ -150,7 +152,7 @@ else:
     df_gamelogs['FP/Min'] = np.where(df_gamelogs.Mins >= 20, df_gamelogs.FP / df_gamelogs.Mins, '')
     df_gamelogs['FP/Min'] = pd.to_numeric(df_gamelogs['FP/Min'])   
     
-    df_gamelogs.to_excel(r'C:\Users\<username>\Desktop\NBA\2019-2020\gamelogs_2020.xlsx')
+    df_gamelogs.to_excel(os.path.join(BASE_DIR, 'gamelogs_2020.xlsx'))
 
 df_gamelogs = df_gamelogs[df_gamelogs['Mins'] >= 20]
 df_gl_count = df_gamelogs.groupby('Name')['FP/Min'].count().reset_index().rename(columns={'FP/Min':'Count'})
@@ -227,7 +229,7 @@ df_team_2020['Team'] = df_team_2020['Team'].map(lambda x: x.rstrip('*'))
                             
 
 #%% Import Player and Team possession data from previous 2 years
-df_import = pd.ExcelFile(r'C:\Users\<username>\Desktop\NBA\2019-2020\Data for Projections.xlsx')
+df_import = pd.ExcelFile(os.path.join(BASE_DIR, 'Data for Projections.xlsx'))
 df_player_2018 = pd.read_excel(df_import, '2018 Player Poss').rename(columns={'FPPP':'FPPP_2018'})
 df_player_2019 = pd.read_excel(df_import, '2019 Player Poss').rename(columns={'FPPP':'FPPP_2019'})
 df_team_2018 = pd.read_excel(df_import, '2018 Team Poss').rename(columns={'Pace':'Pace_2018'})
@@ -394,7 +396,7 @@ df_final.Name.replace({'Cam Reddish':'Cameron Reddish'}, inplace=True)
 
 #%% write to uploadR file to be used in sim/optimization
 
-outputFilename = r'C:\Users\<username>\Desktop\NBA\2019-2020\Agg Sheets\NBA Aggregate ' + date.today().strftime('%m.%d.%Y') + '.xlsx'
-df_final.to_excel(r'C:\Users\<username>\Desktop\NBA\2019-2020\uploadR.xlsx', index=False)
+outputFilename = os.path.join(BASE_DIR, 'Agg Sheets', 'NBA Aggregate ' + date.today().strftime('%m.%d.%Y') + '.xlsx')
+df_final.to_excel(os.path.join(BASE_DIR, 'uploadR.xlsx'), index=False)
 df_combined.to_excel(outputFilename, index=False)
 

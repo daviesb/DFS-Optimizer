@@ -10,13 +10,13 @@ library(doSNOW)
 library(parallel)
 library(future)
 
-setwd("C:/Users/<username>/Desktop/R/NBA")
+base_dir <- "path/to/your/NBA/2019-2020"  # set this to your local data directory
 
 numSimulations <- 100000
 minSalary <- 58500
 
 ### read in raw data and convert numbers to numeric
-raw_data <- read.xlsx2("C:\\Users\\<username>\\Desktop\\NBA\\2019-2020\\uploadR.xlsx", sheetIndex = 1, stringsAsFactors = FALSE)
+raw_data <- read.xlsx2(file.path(base_dir, "uploadR.xlsx"), sheetIndex = 1, stringsAsFactors = FALSE)
 rowCount <- nrow(raw_data)
 raw_data$Salary <- as.numeric(as.character(raw_data$Salary))
 raw_data$Proj <- as.numeric(as.character(raw_data$Proj))
@@ -183,7 +183,7 @@ countsAll <- cbind(countsPG, countsSG, countsSF, countsPF, countsC)
 
 
 today <- paste0(format(Sys.Date(), "%Y"), "_", format(Sys.Date(), "%m"), "_", format(Sys.Date(), "%d"))
-bbm <- read.xlsx2(file = paste0("C:/Users/<username>/Desktop/NBA/2019-2020/BBM/DFS_", today, ".xls"), stringsAsFactors=FALSE, sheetIndex = 1)
+bbm <- read.xlsx2(file = file.path(base_dir, "BBM", paste0("DFS_", today, ".xls")), stringsAsFactors=FALSE, sheetIndex = 1)
 bbm$Price <- as.numeric(bbm$Price)
 bbm <- bbm[,-c(1:3)]
 
@@ -253,7 +253,7 @@ combinations <- t(as.data.frame(as.matrix(combn(top_players, 4))))
 
 
 ### open existing Excel lineup tool, write new data
-lineupSheet <- XLConnect::loadWorkbook("C:/Users/<username>/Desktop/NBA/2019-2020/LineupTool/LineupTool.xlsx")
+lineupSheet <- XLConnect::loadWorkbook(file.path(base_dir, "LineupTool", "LineupTool.xlsx"))
 setStyleAction(lineupSheet, XLC$"STYLE_ACTION.NONE")
 writeWorksheet(lineupSheet, countsExcel, sheet = "Sheet1", header = TRUE, startCol = 2, startRow = 23)
 writeWorksheet(lineupSheet, countsAll, sheet = "Sheet1", header = TRUE, startCol = 18)
@@ -352,9 +352,7 @@ rownames(Value_total) <- NULL
 
 temp <- data[order(-data$PTS),]
 temp <- temp[1:500000,]
-write.csv(temp, file = paste0("C:\\Users\\<username>\\Desktop\\NBA\\2019-2020\\Testing\\", today, ".csv"), row.names = FALSE)
-# write.csv(Value_total, "C:\\Users\\<username>\\Desktop\\NBA\\2019-2020\\Testing\\11.03 Vals.csv", row.names = FALSE)
-# write.csv(counts, "C:\\Users\\<username>\\Desktop\\NBA\\2019-2020\\Testing\\Counts 11.03.2019.csv", row.names = FALSE)
+write.csv(temp, file = file.path(base_dir, "Testing", paste0(today, ".csv")), row.names = FALSE)
 
 
 

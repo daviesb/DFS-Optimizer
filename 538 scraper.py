@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 Created on Sat Aug 24 23:16:05 2019
-
-@author: <username>
 """
 
 import requests
